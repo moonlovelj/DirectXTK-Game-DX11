@@ -8,6 +8,7 @@
 extern void ExitGame();
 
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 using Microsoft::WRL::ComPtr;
 
@@ -30,10 +31,13 @@ void Game::Initialize(HWND window, int width, int height)
 
     // TODO: Change the timer settings if you want something other than the default variable timestep mode.
     // e.g. for 60 FPS fixed timestep update logic, call:
-    /*
+    
     m_timer.SetFixedTimeStep(true);
     m_timer.SetTargetElapsedSeconds(1.0 / 60);
-    */
+    
+    m_keyboard = std::make_unique<Keyboard>();
+    m_mouse = std::make_unique<Mouse>();
+    m_mouse->SetWindow(window);
 }
 
 #pragma region Frame Update
@@ -55,6 +59,16 @@ void Game::Update(DX::StepTimer const& timer)
 
     // TODO: Add your game logic here.
     elapsedTime;
+    auto kb = m_keyboard->GetState();
+    m_camera->Update(elapsedTime);
+    m_camera->TurnLeft(kb.Left);
+    m_camera->TurnRight(kb.Right);
+    m_camera->MoveForward(kb.Up);
+    m_camera->MoveBackward(kb.Down);
+    m_camera->MoveUpward(kb.W);
+    m_camera->MoveDownward(kb.S);
+    m_camera->LookUpward(kb.PageUp);
+    m_camera->LookDownward(kb.PageDown);
 }
 #pragma endregion
 
@@ -74,7 +88,11 @@ void Game::Render()
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     // TODO: Add your rendering code here.
-    context;
+    context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
+    context->OMSetDepthStencilState(m_states->DepthNone(), 0);
+    context->RSSetState(m_raster.Get());
+    m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj);
+
 
     m_deviceResources->PIXEndEvent();
 
@@ -167,11 +185,37 @@ void Game::CreateDeviceDependentResources()
 void Game::CreateWindowSizeDependentResources()
 {
     // TODO: Initialize windows-size dependent objects here.
+    auto device = m_deviceResources->GetD3DDevice();
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto size = m_deviceResources->GetOutputSize();
+    auto backBufferWidth = size.right - size.left;
+    auto backBufferHeight = size.bottom - size.top;
+    m_world = Matrix::Identity;
+    m_view = Matrix::CreateLookAt(Vector3(-2.f, 2.f, -2.f),
+        Vector3::Zero, Vector3::UnitY);
+    m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f,
+        float(backBufferWidth) / float(backBufferHeight), 0.1f, 100.f);
+
+    m_states = std::make_unique<CommonStates>(device);
+
+    CD3D11_RASTERIZER_DESC rastDesc(D3D11_FILL_SOLID, D3D11_CULL_NONE, FALSE,
+        D3D11_DEFAULT_DEPTH_BIAS, D3D11_DEFAULT_DEPTH_BIAS_CLAMP,
+        D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS, TRUE, FALSE, FALSE, TRUE);
+    DX::ThrowIfFailed(device->CreateRasterizerState(&rastDesc,
+        m_raster.ReleaseAndGetAddressOf()));
+
+    m_terrain = std::make_unique<Terrain>(device, context);
+    m_camera = std::make_unique<Camera>();
+    m_camera->SetPosition(50.f, 2.f, -7.f);
 }
 
 void Game::OnDeviceLost()
 {
     // TODO: Add Direct3D resource cleanup here.
+    m_terrain.reset();
+    m_camera.reset();
+    m_states.reset();
+    m_raster.Reset();
 }
 
 void Game::OnDeviceRestored()
