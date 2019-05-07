@@ -20,6 +20,7 @@
     </ClInclude>
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FastNoise.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -30,6 +31,7 @@
     </ClCompile>
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FastNoise.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
