@@ -4,15 +4,21 @@
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
+using Microsoft::WRL::ComPtr;
 
 Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
 {
     m_terrainWidth = 100;
     m_terrainHeight = 100;
 
+    ComPtr<ID3D11Resource> resource;
+    DX::ThrowIfFailed(CreateDDSTextureFromFile(device, L"terrain.dds", resource.GetAddressOf(), m_texture.ReleaseAndGetAddressOf()));
+
     m_states = std::make_unique<CommonStates>(device);
 
     m_effect = std::make_unique<BasicEffect>(device);
+    m_effect->SetTextureEnabled(true);
+    m_effect->SetTexture(m_texture.Get());
     m_effect->EnableDefaultLighting();
     m_effect->SetSpecularColor({ 0.f, 0.f, 0.f, 0.f });
     //m_effect->SetLightEnabled(0, false);
@@ -39,6 +45,7 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
     FastNoise myNoise;
     myNoise.SetNoiseType(FastNoise::PerlinFractal);
     m_vertices.resize(m_terrainWidth * m_terrainHeight);
+    auto textureGrids = std::max(m_terrainWidth / m_terrainTextureRepeat, 1);
     for (int i = 0; i < m_terrainWidth - 1; i++)
     {
         for (int j = 0; j < m_terrainHeight - 1; j++)
@@ -51,22 +58,34 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
             auto& vertex1 = m_vertices[index1];
             auto& vertex2 = m_vertices[index2];
             auto& vertex3 = m_vertices[index3];
+            auto tu = (i % textureGrids) * (1.f / textureGrids) + i / textureGrids;
+            auto tv = (j % textureGrids) * (1.f / textureGrids) + j / textureGrids;
+            auto u = (i % textureGrids + 1) * (1.f / textureGrids) + i / textureGrids;
+            auto v = (j % textureGrids + 1) * (1.f / textureGrids) + j / textureGrids;
 
             vertex0.position.x = static_cast<float>(i);
             vertex0.position.y = m_terrainMaxHeight * myNoise.GetNoise(static_cast<FN_DECIMAL>(i), static_cast<FN_DECIMAL>(j));
             vertex0.position.z = static_cast<float>(j);
+            vertex0.textureCoordinate.x = tu;
+            vertex0.textureCoordinate.y = tv;
 
             vertex1.position.x = static_cast<float>(i + 1);
             vertex1.position.y = m_terrainMaxHeight * myNoise.GetNoise(static_cast<FN_DECIMAL>(i + 1), static_cast<FN_DECIMAL>(j));
             vertex1.position.z = static_cast<float>(j);
+            vertex1.textureCoordinate.x = u;
+            vertex1.textureCoordinate.y = tv;
 
             vertex2.position.x = static_cast<float>(i + 1);
             vertex2.position.y = m_terrainMaxHeight * myNoise.GetNoise(static_cast<FN_DECIMAL>(i + 1), static_cast<FN_DECIMAL>(j + 1));
             vertex2.position.z = static_cast<float>(j + 1);
+            vertex2.textureCoordinate.x = u;
+            vertex2.textureCoordinate.y = v;
 
             vertex3.position.x = static_cast<float>(i);
             vertex3.position.y = m_terrainMaxHeight * myNoise.GetNoise(static_cast<FN_DECIMAL>(i), static_cast<FN_DECIMAL>(j + 1));
             vertex3.position.z = static_cast<float>(j + 1);
+            vertex3.textureCoordinate.x = tu;
+            vertex3.textureCoordinate.y = v;
 
             m_indices.emplace_back(static_cast<uint16_t>(index0));
             m_indices.emplace_back(static_cast<uint16_t>(index1));
@@ -112,6 +131,7 @@ Terrain::~Terrain()
     //m_batch.reset();
     m_inputLayout.Reset();
     m_shape.reset();
+    m_texture.Reset();
 }
 
 void Terrain::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world,

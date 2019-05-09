@@ -10,6 +10,7 @@ public:
 
 private:
     static const int                                m_terrainMaxHeight = 32;
+    static const int                                m_terrainTextureRepeat = 4;
 
     int                                             m_terrainWidth;
     int                                             m_terrainHeight;
@@ -22,5 +23,6 @@ private:
     std::vector<DirectX::GeometricPrimitive::VertexType> m_vertices;
     std::vector<uint16_t>                           m_indices;
     std::unique_ptr<DirectX::GeometricPrimitive>    m_shape;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
 };
 
