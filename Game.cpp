@@ -88,9 +88,9 @@ void Game::Render()
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     // TODO: Add your rendering code here.
-    context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
-    context->OMSetDepthStencilState(m_states->DepthNone(), 0);
-    context->RSSetState(m_raster.Get());
+    context->OMSetBlendState(m_states->AlphaBlend(), Colors::White, 0xFFFFFFFF);
+    context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
+    context->RSSetState(m_states->CullNone());
     m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj);
 
 
