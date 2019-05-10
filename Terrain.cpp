@@ -49,7 +49,11 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
     m_effect = std::make_unique<BasicEffect>(device);
     m_effect->SetTextureEnabled(true);
     m_effect->SetTexture(m_texture.Get());
-    m_effect->EnableDefaultLighting();
+    m_effect->SetLightingEnabled(true);
+    m_effect->SetLightEnabled(0, true);
+    m_effect->SetLightDiffuseColor(0, {1.f, 1.f, 1.f, 0.f});
+    m_effect->SetLightDirection(0, {0.f, -1.f, 2.f, 1.f});
+    m_effect->SetAmbientLightColor({ 0.05f, 0.05f, 0.05f });
     m_effect->SetSpecularColor({ 0.f, 0.f, 0.f, 0.f });
     m_effect->SetVertexColorEnabled(true);
 
