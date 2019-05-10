@@ -21,6 +21,7 @@
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FastNoise.h" />
+    <ClInclude Include="Common.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

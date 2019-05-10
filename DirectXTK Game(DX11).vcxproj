@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Common.hpp" />
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="FastNoise.h" />
     <ClInclude Include="Game.h" />
