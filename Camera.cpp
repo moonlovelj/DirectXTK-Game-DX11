@@ -46,6 +46,11 @@ void Camera::SetPosition(float positionX, float positionY, float positionZ)
     UpdateViewMatrix();
 }
 
+const Vector3 Camera::GetPosition() const
+{
+    return Vector3(m_positionX, m_positionY, m_positionZ);
+}
+
 void Camera::SetRotation(float rotationX, float rotationY, float rotationZ)
 {
     m_rotationX = rotationX;

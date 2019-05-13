@@ -8,6 +8,8 @@ public:
     void Update(float elapsedTime);
 
     void SetPosition(float positionX, float positionY, float positionZ);
+    const DirectX::SimpleMath::Vector3 GetPosition() const;
+
     void SetRotation(float rotationX, float rotationY, float rotationZ);
 
     void MoveForward(bool keydown);

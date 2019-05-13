@@ -88,6 +88,10 @@ void Game::Render()
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     // TODO: Add your rendering code here.
+    auto cameraPos = m_camera->GetPosition();
+    auto skyTranslation = Matrix::CreateTranslation(cameraPos.x, cameraPos.y, cameraPos.z);
+    m_skyDome->Render(context, SimpleMath::operator *(m_world, skyTranslation), m_camera->GetViewMatrix(), m_proj);
+
     m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj);
 
 
@@ -201,6 +205,7 @@ void Game::CreateWindowSizeDependentResources()
     DX::ThrowIfFailed(device->CreateRasterizerState(&rastDesc,
         m_raster.ReleaseAndGetAddressOf()));
 
+    m_skyDome = std::make_unique<SkyDome>(device, context);
     m_terrain = std::make_unique<Terrain>(device, context);
     m_camera = std::make_unique<Camera>();
     m_camera->SetPosition(50.f, 2.f, -7.f);
@@ -213,6 +218,7 @@ void Game::OnDeviceLost()
     m_camera.reset();
     m_states.reset();
     m_raster.Reset();
+    m_skyDome.reset();
 }
 
 void Game::OnDeviceRestored()
