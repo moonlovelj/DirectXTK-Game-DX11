@@ -72,6 +72,8 @@
 #include "VertexTypes.h"
 #include "WICTextureLoader.h"
 
+#include "ReadData.h"
+
 namespace DX
 {
     // Helper class for COM exceptions

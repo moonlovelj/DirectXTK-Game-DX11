@@ -23,6 +23,7 @@
     <ClInclude Include="FastNoise.h" />
     <ClInclude Include="Common.hpp" />
     <ClInclude Include="SkyDome.h" />
+    <ClInclude Include="ReadData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -48,5 +49,8 @@
     <Manifest Include="settings.manifest">
       <Filter>Assets</Filter>
     </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Cloud.hlsl" />
   </ItemGroup>
 </Project>

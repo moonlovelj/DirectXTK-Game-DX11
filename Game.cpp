@@ -69,6 +69,8 @@ void Game::Update(DX::StepTimer const& timer)
     m_camera->MoveDownward(kb.S);
     m_camera->LookUpward(kb.PageUp);
     m_camera->LookDownward(kb.PageDown);
+
+    m_skyDome->Update(elapsedTime);
 }
 #pragma endregion
 
