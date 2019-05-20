@@ -176,6 +176,17 @@ SkyDome::~SkyDome()
 void SkyDome::Update(float elapsedTime)
 {
     elapsedTime;
+
+    m_cloudTexture0Translation += m_cloudTexture0TranslationSpeed;
+    m_cloudTexture1Translation += m_cloudTexture1TranslationSpeed;
+    if (m_cloudTexture0Translation.x > 1.f)
+        m_cloudTexture0Translation.x -= 1.f;
+    if (m_cloudTexture0Translation.y > 1.f)
+        m_cloudTexture0Translation.y -= 1.f;
+    if (m_cloudTexture1Translation.x > 1.f)
+        m_cloudTexture1Translation.x -= 1.f;
+    if (m_cloudTexture1Translation.y > 1.f)
+        m_cloudTexture1Translation.y -= 1.f;
 }
 
 void SkyDome::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world,
@@ -214,10 +225,10 @@ void SkyDome::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleM
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     DX::ThrowIfFailed(deviceContext->Map(m_cloudParams.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
     CloudParams para;
-    para.firstTranslationX = 0.f;
-    para.firstTranslationZ = 0.f;
-    para.secondTranslationX = 0.f;
-    para.secondTranslationZ = 0.f;
+    para.firstTranslationX = m_cloudTexture0Translation.x;
+    para.firstTranslationZ = m_cloudTexture0Translation.y;
+    para.secondTranslationX = m_cloudTexture1Translation.x;
+    para.secondTranslationZ = m_cloudTexture1Translation.y;
     para.brightness = 0.65f;
     *static_cast<CloudParams*>(mappedResource.pData) = para;
     deviceContext->Unmap(m_cloudParams.Get(), 0);
