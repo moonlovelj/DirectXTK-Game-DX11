@@ -37,12 +37,10 @@ void CreateBuffer(_In_ ID3D11Device* device, T const& data, D3D11_BIND_FLAG bind
 
 struct CloudParams
 {
-    float firstTranslationX;
-    float firstTranslationZ;
-    float secondTranslationX;
-    float secondTranslationZ;
+    float translation;
+    float scale;
     float brightness;
-    uint8_t padding[12];
+    uint8_t padding[4];
 };
 
 SkyDome::SkyDome(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
@@ -76,8 +74,8 @@ SkyDome::SkyDome(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
     DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr, m_cloudParams.ReleaseAndGetAddressOf()));
 
     ComPtr<ID3D11Resource> resource;
-    DX::ThrowIfFailed(CreateDDSTextureFromFile(device, L"cloud001.dds", resource.GetAddressOf(), m_texture0Cloud.ReleaseAndGetAddressOf()));
-    DX::ThrowIfFailed(CreateDDSTextureFromFile(device, L"cloud002.dds", resource.GetAddressOf(), m_texture1Cloud.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(CreateDDSTextureFromFile(device, L"cloud001.dds", resource.GetAddressOf(), m_textureCloud.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(CreateDDSTextureFromFile(device, L"perturb001.dds", resource.GetAddressOf(), m_texturePerturb.ReleaseAndGetAddressOf()));
 
     auto blob = DX::ReadData(L"Cloud.cso");
     DX::ThrowIfFailed(device->CreatePixelShader(blob.data(), blob.size(),
@@ -166,8 +164,8 @@ SkyDome::~SkyDome()
     m_inputLayoutCloud.Reset();
     m_vertexBufferCloud.Reset();
     m_indexBufferCloud.Reset();
-    m_texture0Cloud.Reset();
-    m_texture1Cloud.Reset();
+    m_textureCloud.Reset();
+    m_texturePerturb.Reset();
     m_effectCloud.reset();
     m_cloudPS.Reset();
     m_cloudParams.Reset();
@@ -177,16 +175,9 @@ void SkyDome::Update(float elapsedTime)
 {
     elapsedTime;
 
-    m_cloudTexture0Translation += m_cloudTexture0TranslationSpeed;
-    m_cloudTexture1Translation += m_cloudTexture1TranslationSpeed;
-    if (m_cloudTexture0Translation.x > 1.f)
-        m_cloudTexture0Translation.x -= 1.f;
-    if (m_cloudTexture0Translation.y > 1.f)
-        m_cloudTexture0Translation.y -= 1.f;
-    if (m_cloudTexture1Translation.x > 1.f)
-        m_cloudTexture1Translation.x -= 1.f;
-    if (m_cloudTexture1Translation.y > 1.f)
-        m_cloudTexture1Translation.y -= 1.f;
+    m_cloudTextureSampleTranslation += elapsedTime * 0.01f;
+    if (m_cloudTextureSampleTranslation > 1.f)
+        m_cloudTextureSampleTranslation -= 1.f;
 }
 
 void SkyDome::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world,
@@ -225,16 +216,14 @@ void SkyDome::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleM
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     DX::ThrowIfFailed(deviceContext->Map(m_cloudParams.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
     CloudParams para;
-    para.firstTranslationX = m_cloudTexture0Translation.x;
-    para.firstTranslationZ = m_cloudTexture0Translation.y;
-    para.secondTranslationX = m_cloudTexture1Translation.x;
-    para.secondTranslationZ = m_cloudTexture1Translation.y;
+    para.translation = m_cloudTextureSampleTranslation;
+    para.scale = 0.4f;
     para.brightness = 0.65f;
     *static_cast<CloudParams*>(mappedResource.pData) = para;
     deviceContext->Unmap(m_cloudParams.Get(), 0);
     deviceContext->PSSetConstantBuffers(0, 1, m_cloudParams.GetAddressOf());
-    deviceContext->PSSetShaderResources(0, 1, m_texture0Cloud.GetAddressOf());
-    deviceContext->PSSetShaderResources(1, 1, m_texture1Cloud.GetAddressOf());
+    deviceContext->PSSetShaderResources(0, 1, m_textureCloud.GetAddressOf());
+    deviceContext->PSSetShaderResources(1, 1, m_texturePerturb.GetAddressOf());
     
     deviceContext->OMSetBlendState(m_states->Additive(), Color{0,0,0,0}, 0xFFFFFFFF);
     deviceContext->OMSetDepthStencilState(m_states->DepthNone(), 0);
