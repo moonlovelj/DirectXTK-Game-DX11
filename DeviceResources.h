@@ -46,6 +46,10 @@ namespace DX
         ID3D11Texture2D*        GetRenderTarget() const                 { return m_renderTarget.Get(); }
         ID3D11Texture2D*        GetDepthStencil() const                 { return m_depthStencil.Get(); }
         ID3D11RenderTargetView*	GetRenderTargetView() const             { return m_d3dRenderTargetView.Get(); }
+        ID3D11RenderTargetView*	GetReflectTextureRenderTargetView() const { return m_d3dReflectTextureRT.Get(); }
+        ID3D11RenderTargetView*	GetRefractTextureRenderTargetView() const { return m_d3dRefractTextureRT.Get(); }
+        ID3D11ShaderResourceView* GetReflectionSRV() const              { return m_d3dReflectionSRV.Get(); }
+        ID3D11ShaderResourceView* GetRefractionSRV() const              { return m_d3dRefractionSRV.Get(); }
         ID3D11DepthStencilView* GetDepthStencilView() const             { return m_d3dDepthStencilView.Get(); }
         DXGI_FORMAT             GetBackBufferFormat() const             { return m_backBufferFormat; }
         DXGI_FORMAT             GetDepthBufferFormat() const            { return m_depthBufferFormat; }
@@ -86,6 +90,15 @@ namespace DX
         Microsoft::WRL::ComPtr<ID3D11Texture2D>         m_renderTarget;
         Microsoft::WRL::ComPtr<ID3D11Texture2D>         m_depthStencil;
         Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  m_d3dRenderTargetView;
+
+        // Texture rander target.
+        Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	m_d3dReflectTextureRT;
+        Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	m_d3dRefractTextureRT;
+        // Reflection SRV.
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_d3dReflectionSRV;
+        // Refraction SRV.
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_d3dRefractionSRV;
+
         Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  m_d3dDepthStencilView;
         D3D11_VIEWPORT                                  m_screenViewport;
 

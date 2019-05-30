@@ -253,6 +253,10 @@ void DeviceResources::CreateWindowSizeDependentResources()
     ID3D11RenderTargetView* nullViews[] = {nullptr};
     m_d3dContext->OMSetRenderTargets(_countof(nullViews), nullViews, nullptr);
     m_d3dRenderTargetView.Reset();
+    m_d3dReflectTextureRT.Reset();
+    m_d3dRefractTextureRT.Reset();
+    m_d3dReflectionSRV.Reset();
+    m_d3dRefractionSRV.Reset();
     m_d3dDepthStencilView.Reset();
     m_renderTarget.Reset();
     m_depthStencil.Reset();
@@ -371,6 +375,52 @@ void DeviceResources::CreateWindowSizeDependentResources()
         static_cast<float>(backBufferWidth),
         static_cast<float>(backBufferHeight)
         );
+
+    // Create render target view of texture
+    ComPtr<ID3D11Texture2D> reflectTexture;
+    CD3D11_TEXTURE2D_DESC textureDesc(
+        DXGI_FORMAT_R32G32B32A32_FLOAT,
+        backBufferWidth,
+        backBufferHeight,
+        1,
+        1,
+        D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE
+    );
+    DX::ThrowIfFailed(
+        m_d3dDevice->CreateTexture2D(&textureDesc, nullptr, &reflectTexture)
+    );
+
+    DX::ThrowIfFailed(
+        m_d3dDevice->CreateRenderTargetView(
+            reflectTexture.Get(),
+            nullptr,
+            &m_d3dReflectTextureRT
+        )
+    );
+
+    // Create reflection texture SRV
+    DX::ThrowIfFailed(
+        m_d3dDevice->CreateShaderResourceView(reflectTexture.Get(), nullptr, &m_d3dReflectionSRV)
+    );
+
+    ComPtr<ID3D11Texture2D> refractTexture;
+
+    DX::ThrowIfFailed(
+        m_d3dDevice->CreateTexture2D(&textureDesc, nullptr, &refractTexture)
+    );
+
+    DX::ThrowIfFailed(
+        m_d3dDevice->CreateRenderTargetView(
+            refractTexture.Get(),
+            nullptr,
+            &m_d3dRefractTextureRT
+        )
+    );
+
+    // Create reflection texture SRV
+    DX::ThrowIfFailed(
+        m_d3dDevice->CreateShaderResourceView(refractTexture.Get(), nullptr, &m_d3dRefractionSRV)
+    );
 }
 
 // This method is called when the Win32 window is created (or re-created).

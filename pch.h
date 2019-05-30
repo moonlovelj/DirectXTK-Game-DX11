@@ -73,6 +73,7 @@
 #include "WICTextureLoader.h"
 
 #include "ReadData.h"
+#include "ShaderStructures.h"
 
 namespace DX
 {

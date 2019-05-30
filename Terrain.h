@@ -1,4 +1,5 @@
 #pragma once
+
 class Terrain
 {
 public:
@@ -18,11 +19,17 @@ private:
     int                                             m_terrainHeight;
 
     std::unique_ptr<DirectX::CommonStates>          m_states;
-    std::unique_ptr<DirectX::BasicEffect>           m_effect;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>       m_inputLayout;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>	    m_terrainVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>	    m_terrainPixelShader;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_indexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_reflectionMatrixBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_reflectionLightBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
+
+    ReflectionMatrixBufferData                      m_reflectionMatrixBufferData;
+    ReflectionLightBufferData                       m_reflectionLightBufferData;
 
     std::vector<VertexType>                         m_vertices;
     std::vector<uint16_t>                           m_indices;

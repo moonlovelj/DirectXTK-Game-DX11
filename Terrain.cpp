@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Terrain.h"
-#include "FastNoise.h"
+//#include "FastNoise.h"
 #include "Common.hpp"
 
 using namespace DirectX;
@@ -46,28 +46,38 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
 
     m_states = std::make_unique<CommonStates>(device);
 
-    m_effect = std::make_unique<BasicEffect>(device);
-    m_effect->SetTextureEnabled(true);
-    m_effect->SetTexture(m_texture.Get());
-    m_effect->SetLightingEnabled(true);
-    m_effect->SetLightEnabled(0, true);
-    m_effect->SetLightDiffuseColor(0, {1.f, 1.f, 1.f, 0.f});
-    m_effect->SetLightDirection(0, {0.f, -1.f, 2.f, 1.f});
-    m_effect->SetAmbientLightColor({ 0.05f, 0.05f, 0.05f });
-    m_effect->SetSpecularColor({ 0.f, 0.f, 0.f, 0.f });
-    m_effect->SetVertexColorEnabled(true);
+    m_reflectionLightBufferData.lightAmbientColor = { 0.05f, 0.05f, 0.05f, 1.f };
+    m_reflectionLightBufferData.lightDiffuseColor = { 1.f, 1.f, 1.f, 1.f };
+    m_reflectionLightBufferData.lightDirection = { 0.f, -1.f, 2.f };
 
-    void const* shaderByteCode;
-    size_t byteCodeLength;
-    m_effect->GetVertexShaderBytecode(&shaderByteCode, &byteCodeLength);
+    CD3D11_BUFFER_DESC constDesc(sizeof(ReflectionMatrixBufferData), D3D11_BIND_CONSTANT_BUFFER);
+    DX::ThrowIfFailed(
+        device->CreateBuffer(&constDesc, nullptr, &m_reflectionMatrixBuffer)
+    );
+
+    constDesc.ByteWidth = sizeof(ReflectionLightBufferData);
+    DX::ThrowIfFailed(
+        device->CreateBuffer(&constDesc, nullptr, &m_reflectionLightBuffer)
+    );
+
+    deviceContext->UpdateSubresource(m_reflectionLightBuffer.Get(), 0, nullptr, &m_reflectionLightBufferData, 0, 0);
+
+    auto blobVertex = DX::ReadData(L"ReflectionVertexShader.cso");
+    DX::ThrowIfFailed(device->CreateVertexShader(blobVertex.data(), blobVertex.size(),
+        nullptr, m_terrainVertexShader.ReleaseAndGetAddressOf()));
+
+    auto blobPixel = DX::ReadData(L"ReflectionPixelShader.cso");
+    DX::ThrowIfFailed(device->CreatePixelShader(blobPixel.data(), blobPixel.size(),
+        nullptr, m_terrainPixelShader.ReleaseAndGetAddressOf()));
+
     DX::ThrowIfFailed(
         device->CreateInputLayout(VertexType::InputElements,
             VertexType::InputElementCount,
-            shaderByteCode, byteCodeLength,
+            blobVertex.data(), blobVertex.size(),
             m_inputLayout.ReleaseAndGetAddressOf()));
 
-    FastNoise myNoise;
-    myNoise.SetNoiseType(FastNoise::PerlinFractal);
+    /*FastNoise myNoise;
+    myNoise.SetNoiseType(FastNoise::PerlinFractal);*/
     std::vector<uint8_t> heightMap;
     int heightMapWidth, heightMapHeight;
     ReadBitmap("heightmap01.bmp", heightMap, heightMapWidth, heightMapHeight);
@@ -184,20 +194,29 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
 Terrain::~Terrain()
 {
     m_states.reset();
-    m_effect.reset();
     m_inputLayout.Reset();
     m_texture.Reset();
     m_vertexBuffer.Reset();
     m_indexBuffer.Reset();
+    m_terrainVertexShader.Reset();
+    m_terrainPixelShader.Reset();
+    m_reflectionMatrixBuffer.Reset();
+    m_reflectionLightBuffer.Reset();
 }
 
 void Terrain::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world,
     const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj)
 {
-    m_effect->SetWorld(world);
-    m_effect->SetView(view);
-    m_effect->SetProjection(proj);
-    m_effect->Apply(deviceContext);
+    m_reflectionMatrixBufferData.worldMatrix = world;
+    m_reflectionMatrixBufferData.viewMatrix = view;
+    m_reflectionMatrixBufferData.projectMatrix = proj;
+    deviceContext->UpdateSubresource(m_reflectionMatrixBuffer.Get(), 0, nullptr, &m_reflectionMatrixBufferData, 0, 0);
+
+    deviceContext->VSSetShader(m_terrainVertexShader.Get(), nullptr, 0);
+    deviceContext->PSSetShader(m_terrainPixelShader.Get(), nullptr, 0);
+
+    deviceContext->VSSetConstantBuffers(0, 1, m_reflectionMatrixBuffer.GetAddressOf());
+    deviceContext->PSSetConstantBuffers(0, 1, m_reflectionLightBuffer.GetAddressOf());
 
     deviceContext->OMSetBlendState(m_states->AlphaBlend(), Colors::White, 0xFFFFFFFF);
     deviceContext->OMSetDepthStencilState(m_states->DepthDefault(), 0);
@@ -205,6 +224,8 @@ void Terrain::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleM
 
     ID3D11SamplerState* samplers[] = { m_states->LinearWrap() };
     deviceContext->PSSetSamplers(0, 1, samplers);
+
+    deviceContext->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
 
     deviceContext->IASetInputLayout(m_inputLayout.Get());
 

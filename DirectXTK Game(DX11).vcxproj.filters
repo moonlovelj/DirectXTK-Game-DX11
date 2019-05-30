@@ -24,6 +24,8 @@
     <ClInclude Include="Common.hpp" />
     <ClInclude Include="SkyDome.h" />
     <ClInclude Include="ReadData.h" />
+    <ClInclude Include="Water.h" />
+    <ClInclude Include="ShaderStructures.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -36,6 +38,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FastNoise.cpp" />
     <ClCompile Include="SkyDome.cpp" />
+    <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -52,5 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Cloud.hlsl" />
+    <FxCompile Include="ReflectionPixelShader.hlsl" />
+    <FxCompile Include="ReflectionVertexShader.hlsl" />
   </ItemGroup>
 </Project>
