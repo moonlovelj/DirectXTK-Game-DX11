@@ -210,7 +210,7 @@ void Game::CreateWindowSizeDependentResources()
     m_skyDome = std::make_unique<SkyDome>(device, context);
     m_terrain = std::make_unique<Terrain>(device, context);
     m_camera = std::make_unique<Camera>();
-    m_camera->SetPosition(50.f, 2.f, -7.f);
+    m_camera->SetPosition(50.f, 10.f, -4.f);
 }
 
 void Game::OnDeviceLost()

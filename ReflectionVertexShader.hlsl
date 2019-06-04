@@ -6,13 +6,17 @@
 /////////////
 // GLOBALS //
 /////////////
-cbuffer MatrixBuffer
+cbuffer MatrixBuffer : register (b0)
 {
     row_major matrix worldMatrix;
     row_major matrix viewMatrix;
     row_major matrix projectionMatrix;
 };
 
+cbuffer ClipPlaneConstBuffer
+{
+    float4 clipPlane;
+};
 
 //////////////
 // TYPEDEFS //
@@ -31,6 +35,7 @@ struct PixelInputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL0;
     float4 color : COLOR0;
+    float clip : SV_ClipDistance0;
 };
 
 
@@ -58,6 +63,9 @@ PixelInputType main(VertexInputType input)
 
     // Send the color map color into the pixel shader.	
     output.color = input.color;
+
+    // Set the clipping plane.
+    output.clip = dot(mul(input.position, worldMatrix), clipPlane);
 
     return output;
 }

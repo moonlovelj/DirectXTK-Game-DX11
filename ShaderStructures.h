@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pch.h"
 
 struct ReflectionMatrixBufferData
@@ -14,4 +15,9 @@ struct ReflectionLightBufferData
     DirectX::SimpleMath::Vector4 lightDiffuseColor;
     DirectX::SimpleMath::Vector3 lightDirection;
     uint8_t padding[4];
+};
+
+struct ClipPlaneConstBufferData
+{
+    DirectX::SimpleMath::Plane clipPlane;
 };

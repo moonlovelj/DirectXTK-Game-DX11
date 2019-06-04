@@ -26,10 +26,12 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_indexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_reflectionMatrixBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_reflectionLightBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_clipPlaneConstBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
 
     ReflectionMatrixBufferData                      m_reflectionMatrixBufferData;
     ReflectionLightBufferData                       m_reflectionLightBufferData;
+    ClipPlaneConstBufferData                        m_clipPlaneConstBufferData;
 
     std::vector<VertexType>                         m_vertices;
     std::vector<uint16_t>                           m_indices;

@@ -50,6 +50,11 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
     m_reflectionLightBufferData.lightDiffuseColor = { 1.f, 1.f, 1.f, 1.f };
     m_reflectionLightBufferData.lightDirection = { 0.f, -1.f, 2.f };
 
+    m_clipPlaneConstBufferData.clipPlane.x = 0.f;
+    m_clipPlaneConstBufferData.clipPlane.y = 1.f;
+    m_clipPlaneConstBufferData.clipPlane.z = 0.f;
+    m_clipPlaneConstBufferData.clipPlane.w = 100.f;
+
     CD3D11_BUFFER_DESC constDesc(sizeof(ReflectionMatrixBufferData), D3D11_BIND_CONSTANT_BUFFER);
     DX::ThrowIfFailed(
         device->CreateBuffer(&constDesc, nullptr, &m_reflectionMatrixBuffer)
@@ -60,7 +65,14 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
         device->CreateBuffer(&constDesc, nullptr, &m_reflectionLightBuffer)
     );
 
+    constDesc.ByteWidth = sizeof(ClipPlaneConstBufferData);
+    DX::ThrowIfFailed(
+        device->CreateBuffer(&constDesc, nullptr, &m_clipPlaneConstBuffer)
+    );
+
     deviceContext->UpdateSubresource(m_reflectionLightBuffer.Get(), 0, nullptr, &m_reflectionLightBufferData, 0, 0);
+
+    deviceContext->UpdateSubresource(m_clipPlaneConstBuffer.Get(), 0, nullptr, &m_clipPlaneConstBufferData, 0, 0);
 
     auto blobVertex = DX::ReadData(L"ReflectionVertexShader.cso");
     DX::ThrowIfFailed(device->CreateVertexShader(blobVertex.data(), blobVertex.size(),
@@ -202,6 +214,7 @@ Terrain::~Terrain()
     m_terrainPixelShader.Reset();
     m_reflectionMatrixBuffer.Reset();
     m_reflectionLightBuffer.Reset();
+    m_clipPlaneConstBuffer.Reset();
 }
 
 void Terrain::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world,
@@ -216,6 +229,7 @@ void Terrain::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleM
     deviceContext->PSSetShader(m_terrainPixelShader.Get(), nullptr, 0);
 
     deviceContext->VSSetConstantBuffers(0, 1, m_reflectionMatrixBuffer.GetAddressOf());
+    deviceContext->VSSetConstantBuffers(1, 1, m_clipPlaneConstBuffer.GetAddressOf());
     deviceContext->PSSetConstantBuffers(0, 1, m_reflectionLightBuffer.GetAddressOf());
 
     deviceContext->OMSetBlendState(m_states->AlphaBlend(), Colors::White, 0xFFFFFFFF);
