@@ -39,6 +39,7 @@
     <ClCompile Include="FastNoise.cpp" />
     <ClCompile Include="SkyDome.cpp" />
     <ClCompile Include="Water.cpp" />
+    <ClCompile Include="Common.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -57,5 +58,7 @@
     <FxCompile Include="Cloud.hlsl" />
     <FxCompile Include="ReflectionPixelShader.hlsl" />
     <FxCompile Include="ReflectionVertexShader.hlsl" />
+    <FxCompile Include="WaterPixelShader.hlsl" />
+    <FxCompile Include="WaterVertexShader.hlsl" />
   </ItemGroup>
 </Project>

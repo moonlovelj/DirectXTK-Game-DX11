@@ -96,6 +96,8 @@ void Game::Render()
 
     m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj);
 
+    m_water->Render(context, Matrix::CreateTranslation({128.f, 0 , 128.f}), m_camera->GetViewMatrix(), m_proj);
+   
 
     m_deviceResources->PIXEndEvent();
 
@@ -211,6 +213,8 @@ void Game::CreateWindowSizeDependentResources()
     m_terrain = std::make_unique<Terrain>(device, context);
     m_camera = std::make_unique<Camera>();
     m_camera->SetPosition(50.f, 10.f, -4.f);
+    m_water = std::make_unique<Water>(device, context, 3.75f, 128.f);
+
 }
 
 void Game::OnDeviceLost()
@@ -221,6 +225,7 @@ void Game::OnDeviceLost()
     m_states.reset();
     m_raster.Reset();
     m_skyDome.reset();
+    m_water.reset();
 }
 
 void Game::OnDeviceRestored()

@@ -2,7 +2,7 @@
 
 #include "pch.h"
 
-struct ReflectionMatrixBufferData
+struct MatrixBufferData
 {
     DirectX::SimpleMath::Matrix worldMatrix;
     DirectX::SimpleMath::Matrix viewMatrix;
@@ -20,4 +20,9 @@ struct ReflectionLightBufferData
 struct ClipPlaneConstBufferData
 {
     DirectX::SimpleMath::Plane clipPlane;
+};
+
+struct ReflectionBufferData
+{
+    DirectX::SimpleMath::Matrix reflectionMatrix;
 };

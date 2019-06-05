@@ -55,7 +55,7 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
     m_clipPlaneConstBufferData.clipPlane.z = 0.f;
     m_clipPlaneConstBufferData.clipPlane.w = 100.f;
 
-    CD3D11_BUFFER_DESC constDesc(sizeof(ReflectionMatrixBufferData), D3D11_BIND_CONSTANT_BUFFER);
+    CD3D11_BUFFER_DESC constDesc(sizeof(MatrixBufferData), D3D11_BIND_CONSTANT_BUFFER);
     DX::ThrowIfFailed(
         device->CreateBuffer(&constDesc, nullptr, &m_reflectionMatrixBuffer)
     );
@@ -174,29 +174,7 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
         }
     }
 
-    std::vector<Vector3> normals(m_terrainWidth * m_terrainHeight);
-    for (size_t i = 0; i < m_indices.size(); i += 3)
-    {
-        auto vertex0 = Vector3(m_vertices[m_indices[i + 0]].position);
-        auto vertex1 = Vector3(m_vertices[m_indices[i + 1]].position);
-        auto vertex2 = Vector3(m_vertices[m_indices[i + 2]].position);
-        auto normal = (vertex0 - vertex1).Cross(vertex2 - vertex1);
-        normals[m_indices[i + 0]] += normal;
-        normals[m_indices[i + 1]] += normal;
-        normals[m_indices[i + 2]] += normal;
-    }
-
-    for (auto& normal : normals)
-    {
-        normal.Normalize();
-    }
-
-    for (size_t i = 0; i < m_vertices.size(); i++)
-    {
-        m_vertices[i].normal.x = normals[i].x;
-        m_vertices[i].normal.y = normals[i].y;
-        m_vertices[i].normal.z = normals[i].z;
-    }
+    CalculateNormal(m_vertices, m_indices);
 
     CreateBuffer(device, m_vertices, D3D11_BIND_VERTEX_BUFFER, &m_vertexBuffer);
     CreateBuffer(device, m_indices, D3D11_BIND_INDEX_BUFFER, &m_indexBuffer);

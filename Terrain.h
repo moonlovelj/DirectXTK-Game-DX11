@@ -29,7 +29,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_clipPlaneConstBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
 
-    ReflectionMatrixBufferData                      m_reflectionMatrixBufferData;
+    MatrixBufferData                                m_reflectionMatrixBufferData;
     ReflectionLightBufferData                       m_reflectionLightBufferData;
     ClipPlaneConstBufferData                        m_clipPlaneConstBufferData;
 
