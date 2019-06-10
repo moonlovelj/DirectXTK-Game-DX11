@@ -47,6 +47,8 @@ private:
     void Render();
 
     void Clear();
+    void ClearReflection();
+    void ClearRefraction();
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();

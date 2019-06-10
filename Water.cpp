@@ -10,6 +10,8 @@ Water::Water(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext, float w
     :m_waterHeight(waterHeight),
     m_waterRadius(waterRadius)
 {
+    deviceContext;
+
     m_vertices.resize(4);
     m_indices.resize(6);
 
@@ -71,6 +73,11 @@ Water::Water(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext, float w
         device->CreateBuffer(&constDesc, nullptr, &m_matrixBuffer)
     );
 
+    constDesc.ByteWidth = sizeof(ReflectionBufferData);
+    DX::ThrowIfFailed(
+        device->CreateBuffer(&constDesc, nullptr, &m_reflectBuffer)
+    );
+
     m_states = std::make_unique<DirectX::CommonStates>(device);
 }
 
@@ -85,28 +92,39 @@ Water::~Water()
     m_indexBuffer.Reset();
     m_texture.Reset();
     m_matrixBuffer.Reset();
+    m_reflectBuffer.Reset();
 }
 
-void Water::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world, const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj)
+void Water::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world, 
+    const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj,
+    const DirectX::SimpleMath::Matrix& reflectView,
+    ID3D11ShaderResourceView* reflectTexture, 
+    ID3D11ShaderResourceView* refractTexture)
 {
     m_matrixBufferData.worldMatrix = world;
     m_matrixBufferData.viewMatrix = view;
     m_matrixBufferData.projectMatrix = proj;
     deviceContext->UpdateSubresource(m_matrixBuffer.Get(), 0, nullptr, &m_matrixBufferData, 0, 0);
 
+    m_reflectBufferData.reflectionMatrix = reflectView;
+    deviceContext->UpdateSubresource(m_reflectBuffer.Get(), 0, nullptr, &m_reflectBufferData, 0, 0);
+
     deviceContext->VSSetShader(m_waterVertexShader.Get(), nullptr, 0);
     deviceContext->PSSetShader(m_waterPixelShader.Get(), nullptr, 0);
 
     deviceContext->VSSetConstantBuffers(0, 1, m_matrixBuffer.GetAddressOf());
+    deviceContext->VSSetConstantBuffers(1, 1, m_reflectBuffer.GetAddressOf());
 
     deviceContext->OMSetBlendState(m_states->Additive(), Color{ 0,0,0,0 }, 0xFFFFFFFF);
     deviceContext->OMSetDepthStencilState(m_states->DepthDefault(), 0);
     deviceContext->RSSetState(m_states->CullCounterClockwise());
 
-    //sID3D11SamplerState* samplers[] = { m_states->LinearWrap() };
-    //deviceContext->PSSetSamplers(0, 1, samplers);
+    ID3D11SamplerState* samplers[] = { m_states->LinearWrap() };
+    deviceContext->PSSetSamplers(0, 1, samplers);
 
-    //deviceContext->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
+    deviceContext->PSSetShaderResources(0, 1, &refractTexture);
+    deviceContext->PSSetShaderResources(1, 1, &reflectTexture);
+    deviceContext->PSSetShaderResources(2, 1, m_texture.GetAddressOf());
 
     deviceContext->IASetInputLayout(m_inputLayout.Get());
 
@@ -118,4 +136,14 @@ void Water::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMat
     deviceContext->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     deviceContext->DrawIndexed(static_cast<UINT>(m_indices.size()), 0, 0);
+}
+
+DirectX::SimpleMath::Plane Water::GetWaterPlane() const
+{
+    return { 0.f, 1.f, 0.f, -m_waterHeight };
+}
+
+float Water::GetWaterPlaneHeight() const
+{
+    return m_waterHeight;
 }

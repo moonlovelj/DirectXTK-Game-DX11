@@ -196,12 +196,19 @@ Terrain::~Terrain()
 }
 
 void Terrain::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world,
-    const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj)
+    const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj,
+    const DirectX::SimpleMath::Plane& clipPlane)
 {
     m_reflectionMatrixBufferData.worldMatrix = world;
     m_reflectionMatrixBufferData.viewMatrix = view;
     m_reflectionMatrixBufferData.projectMatrix = proj;
     deviceContext->UpdateSubresource(m_reflectionMatrixBuffer.Get(), 0, nullptr, &m_reflectionMatrixBufferData, 0, 0);
+
+    m_clipPlaneConstBufferData.clipPlane.x = clipPlane.x;
+    m_clipPlaneConstBufferData.clipPlane.y = clipPlane.y;
+    m_clipPlaneConstBufferData.clipPlane.z = clipPlane.z;
+    m_clipPlaneConstBufferData.clipPlane.w = clipPlane.w;
+    deviceContext->UpdateSubresource(m_clipPlaneConstBuffer.Get(), 0, nullptr, &m_clipPlaneConstBufferData, 0, 0);
 
     deviceContext->VSSetShader(m_terrainVertexShader.Get(), nullptr, 0);
     deviceContext->PSSetShader(m_terrainPixelShader.Get(), nullptr, 0);

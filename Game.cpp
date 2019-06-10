@@ -84,19 +84,33 @@ void Game::Render()
         return;
     }
 
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto cameraPos = m_camera->GetPosition();
+    auto skyTranslation = Matrix::CreateTranslation(cameraPos.x, cameraPos.y, cameraPos.z);
+    auto skyReflectTranslation = Matrix::CreateTranslation(cameraPos.x, -cameraPos.y + 2.f * m_water->GetWaterPlaneHeight(), cameraPos.z);
+    auto waterPlane = m_water->GetWaterPlane();
+    Plane normalClipPlane{ 0.f, 1.f, 0.f, 100.f };
+
+    ClearReflection();
+    m_skyDome->Render(context, SimpleMath::operator *(m_world, skyReflectTranslation), m_camera->GetReflectionMatrix(m_water->GetWaterPlaneHeight()), m_proj);
+    m_terrain->Render(context, m_world, m_camera->GetReflectionMatrix(m_water->GetWaterPlaneHeight()), m_proj, waterPlane);
+
+    ClearRefraction();
+    m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj, { 0.f, -1.f, 0.f, m_water->GetWaterPlaneHeight() + 0.1f });
+
     Clear();
 
     m_deviceResources->PIXBeginEvent(L"Render");
-    auto context = m_deviceResources->GetD3DDeviceContext();
-
+   
     // TODO: Add your rendering code here.
-    auto cameraPos = m_camera->GetPosition();
-    auto skyTranslation = Matrix::CreateTranslation(cameraPos.x, cameraPos.y, cameraPos.z);
+    
     m_skyDome->Render(context, SimpleMath::operator *(m_world, skyTranslation), m_camera->GetViewMatrix(), m_proj);
 
-    m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj);
+    m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj, normalClipPlane);
 
-    m_water->Render(context, Matrix::CreateTranslation({128.f, 0 , 128.f}), m_camera->GetViewMatrix(), m_proj);
+    m_water->Render(context, Matrix::CreateTranslation({128.f, 0 , 128.f}), m_camera->GetViewMatrix(), m_proj, 
+        m_camera->GetReflectionMatrix(m_water->GetWaterPlaneHeight()),
+        m_deviceResources->GetReflectionSRV(), m_deviceResources->GetRefractionSRV());
    
 
     m_deviceResources->PIXEndEvent();
@@ -125,6 +139,47 @@ void Game::Clear()
 
     m_deviceResources->PIXEndEvent();
 }
+
+void Game::ClearReflection()
+{
+    m_deviceResources->PIXBeginEvent(L"ClearReflection");
+
+    // Clear the views.
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto renderTarget = m_deviceResources->GetReflectTextureRenderTargetView();
+    auto depthStencil = m_deviceResources->GetDepthStencilView();
+
+    context->ClearRenderTargetView(renderTarget, Colors::Black);
+    context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    context->OMSetRenderTargets(1, &renderTarget, depthStencil);
+
+    // Set the viewport.
+    auto viewport = m_deviceResources->GetScreenViewport();
+    context->RSSetViewports(1, &viewport);
+
+    m_deviceResources->PIXEndEvent();
+}
+
+void Game::ClearRefraction()
+{
+    m_deviceResources->PIXBeginEvent(L"ClearRefraction");
+
+    // Clear the views.
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto renderTarget = m_deviceResources->GetRefractTextureRenderTargetView();
+    auto depthStencil = m_deviceResources->GetDepthStencilView();
+
+    context->ClearRenderTargetView(renderTarget, Colors::Black);
+    context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    context->OMSetRenderTargets(1, &renderTarget, depthStencil);
+
+    // Set the viewport.
+    auto viewport = m_deviceResources->GetScreenViewport();
+    context->RSSetViewports(1, &viewport);
+
+    m_deviceResources->PIXEndEvent();
+}
+
 #pragma endregion
 
 #pragma region Message Handlers

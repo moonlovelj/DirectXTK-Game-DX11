@@ -236,6 +236,24 @@ const DirectX::SimpleMath::Matrix& Camera::GetViewMatrix() const
     return m_viewMatrix;
 }
 
+DirectX::SimpleMath::Matrix Camera::GetReflectionMatrix(float height)
+{
+    Vector3 up(0.f, 1.f, 0.f);
+    Vector3 position(m_positionX, -m_positionY + 2.f * height, m_positionZ);
+    Vector3 lookAt(0.f, 0.f, 1.f);
+
+    auto pitch = XMConvertToRadians(-m_rotationX);
+    auto yaw = XMConvertToRadians(m_rotationY);
+    auto roll = XMConvertToRadians(m_rotationZ);
+
+    auto rotationMatrix = Matrix::CreateFromYawPitchRoll(yaw, pitch, roll);
+    lookAt = Vector3::Transform(lookAt, rotationMatrix);
+    up = Vector3::Transform(up, rotationMatrix);
+    lookAt = position + lookAt;
+
+    return Matrix::CreateLookAt(position, lookAt, up);
+}
+
 void Camera::UpdateViewMatrix()
 {
     Vector3 up(0.f, 1.f, 0.f);

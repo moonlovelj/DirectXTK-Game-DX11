@@ -22,6 +22,7 @@ public:
     void LookDownward(bool keydown);
 
     const DirectX::SimpleMath::Matrix& GetViewMatrix() const;
+    DirectX::SimpleMath::Matrix GetReflectionMatrix(float height);
 
 private:
     void UpdateViewMatrix();

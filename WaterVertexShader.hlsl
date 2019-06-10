@@ -46,9 +46,29 @@ PixelShaderInput main(VertexShaderInput input)
     output.pos = mul(output.pos, viewMatrix);
     output.pos = mul(output.pos, projectionMatrix);
 
+    output.reflectPosition = mul(input.pos, worldMatrix);
+    output.reflectPosition = mul(output.reflectPosition, reflectionMatrix);
+    output.reflectPosition = mul(output.reflectPosition, projectionMatrix);
+
+    output.refractPosition = mul(input.pos, worldMatrix);
+    output.refractPosition = mul(output.refractPosition, viewMatrix);
+    output.refractPosition = mul(output.refractPosition, projectionMatrix);
+
     output.color = input.color;
 
     output.tex = input.tex;
+
+    // Calculate the normal vector against the world matrix only and then normalize the final value.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+    output.normal = normalize(output.normal);
+
+    // Calculate the tangent vector against the world matrix only and then normalize the final value.
+    output.tangent = mul(input.tangent.xyz, (float3x3)worldMatrix);
+    output.tangent = normalize(output.tangent);
+
+    output.binormal = cross(output.normal, output.tangent);
+    output.binormal = normalize(output.binormal);
+    output.binormal.xyz = output.binormal.xyz * input.tangent.w;
 
     return output;
 }
