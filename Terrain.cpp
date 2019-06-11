@@ -48,7 +48,7 @@ Terrain::Terrain(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
 
     m_reflectionLightBufferData.lightAmbientColor = { 0.05f, 0.05f, 0.05f, 1.f };
     m_reflectionLightBufferData.lightDiffuseColor = { 1.f, 1.f, 1.f, 1.f };
-    m_reflectionLightBufferData.lightDirection = { 0.f, -1.f, 2.f };
+    m_reflectionLightBufferData.lightDirection = { 0.f, -1.f, -2.f };
 
     m_clipPlaneConstBufferData.clipPlane.x = 0.f;
     m_clipPlaneConstBufferData.clipPlane.y = 1.f;

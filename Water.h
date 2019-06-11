@@ -7,11 +7,14 @@ public:
 
     using VertexType = DirectX::VertexPositionNormalTangentColorTexture;
 
+    void Update(float elapsedTime);
+
     void Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world,
         const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj, 
         const DirectX::SimpleMath::Matrix& reflectView,
         ID3D11ShaderResourceView* reflectTexture,
-        ID3D11ShaderResourceView* refractTexture);
+        ID3D11ShaderResourceView* refractTexture,
+        const DirectX::SimpleMath::Vector3& camPos);
 
     DirectX::SimpleMath::Plane GetWaterPlane() const;
     float GetWaterPlaneHeight() const;
@@ -25,6 +28,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_indexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_matrixBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_reflectBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_waterBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_camNormBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
 
     std::vector<VertexType>                         m_vertices;
@@ -32,6 +37,8 @@ private:
 
     MatrixBufferData                                m_matrixBufferData;
     ReflectionBufferData                            m_reflectBufferData;
+    WaterBufferData                                 m_waterBufferData;
+    CamNormBufferData                               m_camNormBufferData;
 
     float                                           m_waterHeight;
     float                                           m_waterRadius;

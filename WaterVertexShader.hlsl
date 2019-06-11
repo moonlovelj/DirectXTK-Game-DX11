@@ -11,6 +11,13 @@ cbuffer ReflectionBuffer
     row_major matrix reflectionMatrix;
 };
 
+cbuffer CamNormBuffer
+{
+    float3 cameraPosition;
+    float normalMapTilingX;
+    float normalMapTilingY;
+};
+
 // Per-vertex data used as input to the vertex shader.
 struct VertexShaderInput
 {
@@ -32,6 +39,9 @@ struct PixelShaderInput
     float2 tex : TEXCOORD0;
     float4 reflectPosition : TEXCOORD1;
     float4 refractPosition : TEXCOORD2;
+    float3 viewDirection : TEXCOORD3;
+    float2 tex1 : TEXCOORD4;
+    float2 tex2 : TEXCOORD5;
 };
 
 PixelShaderInput main(VertexShaderInput input)
@@ -69,6 +79,15 @@ PixelShaderInput main(VertexShaderInput input)
     output.binormal = cross(output.normal, output.tangent);
     output.binormal = normalize(output.binormal);
     output.binormal.xyz = output.binormal.xyz * input.tangent.w;
+
+    // Determine the viewing direction based on the position of the camera and the position of the vertex in the world.
+    output.viewDirection = cameraPosition.xyz - mul(input.pos, worldMatrix).xyz;
+
+    // Normalize the viewing direction vector.
+    output.viewDirection = normalize(output.viewDirection);
+
+    output.tex1 = input.tex / normalMapTilingX;
+    output.tex2 = input.tex / normalMapTilingY;
 
     return output;
 }

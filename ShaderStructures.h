@@ -26,3 +26,20 @@ struct ReflectionBufferData
 {
     DirectX::SimpleMath::Matrix reflectionMatrix;
 };
+
+struct WaterBufferData
+{
+    DirectX::SimpleMath::Vector3 lightDirection;
+    float waterTranslation;
+    float reflectRefractScale;
+    float specularShininess;
+    uint8_t padding[8];
+};
+
+struct CamNormBufferData
+{
+    DirectX::SimpleMath::Vector3 cameraPosition;
+    float normalMapTilingX;
+    float normalMapTilingY;
+    uint8_t padding[12];
+};

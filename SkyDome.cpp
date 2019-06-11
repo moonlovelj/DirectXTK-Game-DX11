@@ -84,8 +84,8 @@ SkyDome::SkyDome(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
     std::vector<GeometricPrimitive::VertexType> vertices;
     GeometricPrimitive::CreateSphere(vertices, m_indicesSky, 2, 20);
     m_verticesSky.resize(vertices.size());
-    Color apexColor(0.f, 0.15f, 0.66f, 1.f);
-    Color centerColor(0.81f, 0.38f, 0.66f, 1.f);
+    Color apexColor(0.f, 0.5f, 1.f, 1.f);
+    Color centerColor(0.f, 0.5f, 1.f, 1.f);
     for (size_t i = 0; i < m_verticesSky.size(); i++)
     {
         m_verticesSky[i].position.x = vertices[i].position.x;

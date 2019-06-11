@@ -55,7 +55,7 @@ float4 main(PixelInputType input) : SV_TARGET
 
     color = saturate(color);
 
-    color = (color * input.color * textureColor);
+    color = saturate(color * input.color * textureColor);
 
     return color;
 }

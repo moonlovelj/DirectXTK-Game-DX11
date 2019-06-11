@@ -71,6 +71,7 @@ void Game::Update(DX::StepTimer const& timer)
     m_camera->LookDownward(kb.PageDown);
 
     m_skyDome->Update(elapsedTime);
+    m_water->Update(elapsedTime);
 }
 #pragma endregion
 
@@ -110,8 +111,15 @@ void Game::Render()
 
     m_water->Render(context, Matrix::CreateTranslation({128.f, 0 , 128.f}), m_camera->GetViewMatrix(), m_proj, 
         m_camera->GetReflectionMatrix(m_water->GetWaterPlaneHeight()),
-        m_deviceResources->GetReflectionSRV(), m_deviceResources->GetRefractionSRV());
+        m_deviceResources->GetReflectionSRV(), m_deviceResources->GetRefractionSRV(),
+        m_camera->GetPosition());
    
+
+    ID3D11ShaderResourceView* nullSrv = nullptr;
+    context->PSSetShaderResources(0, 1, &nullSrv);
+    context->PSSetShaderResources(1, 1, &nullSrv);
+    context->PSSetShaderResources(2, 1, &nullSrv);
+
 
     m_deviceResources->PIXEndEvent();
 

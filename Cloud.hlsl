@@ -27,7 +27,7 @@ float4 main(float4 color : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target0
     float4 cloudColor = CloudTexture.Sample(TextureSampler, perturbValue.xy);
 
     // Reduce the color cloud by the brightness value.
-    cloudColor = cloudColor * brightness;
+    cloudColor = saturate(cloudColor * brightness);
 
     return cloudColor;
 }

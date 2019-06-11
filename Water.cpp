@@ -12,6 +12,15 @@ Water::Water(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext, float w
 {
     deviceContext;
 
+    m_waterBufferData.waterTranslation = 0.f;
+    m_waterBufferData.reflectRefractScale = 0.03f;
+    m_waterBufferData.lightDirection = { 0.f, -1.f, -2.f };
+    m_waterBufferData.specularShininess = 200.f;
+
+    m_camNormBufferData.normalMapTilingX = 0.1f;
+    m_camNormBufferData.normalMapTilingY = 0.2f;
+
+
     m_vertices.resize(4);
     m_indices.resize(6);
 
@@ -78,6 +87,16 @@ Water::Water(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext, float w
         device->CreateBuffer(&constDesc, nullptr, &m_reflectBuffer)
     );
 
+    constDesc.ByteWidth = sizeof(WaterBufferData);
+    DX::ThrowIfFailed(
+        device->CreateBuffer(&constDesc, nullptr, &m_waterBuffer)
+    );
+
+    constDesc.ByteWidth = sizeof(CamNormBufferData);
+    DX::ThrowIfFailed(
+        device->CreateBuffer(&constDesc, nullptr, &m_camNormBuffer)
+    );
+
     m_states = std::make_unique<DirectX::CommonStates>(device);
 }
 
@@ -93,13 +112,23 @@ Water::~Water()
     m_texture.Reset();
     m_matrixBuffer.Reset();
     m_reflectBuffer.Reset();
+    m_waterBuffer.Reset();
+    m_camNormBuffer.Reset();
+}
+
+void Water::Update(float elapsedTime)
+{
+    m_waterBufferData.waterTranslation += elapsedTime * 0.1f;
+    if (m_waterBufferData.waterTranslation > 1.f)
+        m_waterBufferData.waterTranslation -= 1.f;
 }
 
 void Water::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMath::Matrix& world, 
     const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj,
     const DirectX::SimpleMath::Matrix& reflectView,
     ID3D11ShaderResourceView* reflectTexture, 
-    ID3D11ShaderResourceView* refractTexture)
+    ID3D11ShaderResourceView* refractTexture,
+    const DirectX::SimpleMath::Vector3& camPos)
 {
     m_matrixBufferData.worldMatrix = world;
     m_matrixBufferData.viewMatrix = view;
@@ -109,11 +138,20 @@ void Water::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMat
     m_reflectBufferData.reflectionMatrix = reflectView;
     deviceContext->UpdateSubresource(m_reflectBuffer.Get(), 0, nullptr, &m_reflectBufferData, 0, 0);
 
+    deviceContext->UpdateSubresource(m_waterBuffer.Get(), 0, nullptr, &m_waterBufferData, 0, 0);
+
+    m_camNormBufferData.cameraPosition = camPos;
+    deviceContext->UpdateSubresource(m_camNormBuffer.Get(), 0, nullptr, &m_camNormBufferData, 0, 0);
+
     deviceContext->VSSetShader(m_waterVertexShader.Get(), nullptr, 0);
     deviceContext->PSSetShader(m_waterPixelShader.Get(), nullptr, 0);
 
     deviceContext->VSSetConstantBuffers(0, 1, m_matrixBuffer.GetAddressOf());
     deviceContext->VSSetConstantBuffers(1, 1, m_reflectBuffer.GetAddressOf());
+    deviceContext->VSSetConstantBuffers(2, 1, m_camNormBuffer.GetAddressOf());
+
+    deviceContext->PSSetConstantBuffers(0, 1, m_waterBuffer.GetAddressOf());
+
 
     deviceContext->OMSetBlendState(m_states->Additive(), Color{ 0,0,0,0 }, 0xFFFFFFFF);
     deviceContext->OMSetDepthStencilState(m_states->DepthDefault(), 0);
