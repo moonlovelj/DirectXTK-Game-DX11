@@ -26,6 +26,7 @@
     <ClInclude Include="ReadData.h" />
     <ClInclude Include="Water.h" />
     <ClInclude Include="ShaderStructures.h" />
+    <ClInclude Include="Foliage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -40,6 +41,7 @@
     <ClCompile Include="SkyDome.cpp" />
     <ClCompile Include="Water.cpp" />
     <ClCompile Include="Common.cpp" />
+    <ClCompile Include="Foliage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -60,5 +62,7 @@
     <FxCompile Include="ReflectionVertexShader.hlsl" />
     <FxCompile Include="WaterPixelShader.hlsl" />
     <FxCompile Include="WaterVertexShader.hlsl" />
+    <FxCompile Include="FoliagePixelShader.hlsl" />
+    <FxCompile Include="FoliageVertexShader.hlsl" />
   </ItemGroup>
 </Project>
