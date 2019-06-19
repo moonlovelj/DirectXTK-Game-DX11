@@ -217,7 +217,7 @@ void Terrain::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleM
     deviceContext->VSSetConstantBuffers(1, 1, m_clipPlaneConstBuffer.GetAddressOf());
     deviceContext->PSSetConstantBuffers(0, 1, m_reflectionLightBuffer.GetAddressOf());
 
-    deviceContext->OMSetBlendState(m_states->AlphaBlend(), Colors::White, 0xFFFFFFFF);
+    deviceContext->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
     deviceContext->OMSetDepthStencilState(m_states->DepthDefault(), 0);
     deviceContext->RSSetState(m_states->CullCounterClockwise());
 

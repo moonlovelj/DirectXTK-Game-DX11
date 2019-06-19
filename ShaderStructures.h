@@ -43,3 +43,11 @@ struct CamNormBufferData
     float normalMapTilingY;
     uint8_t padding[12];
 };
+
+struct FoliageBufferData
+{
+    DirectX::SimpleMath::Vector3 cameraPosition;
+    float  treeBillWidth;
+    float  treeBillHeight;
+    uint8_t padding[12];
+};

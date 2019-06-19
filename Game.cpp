@@ -114,6 +114,7 @@ void Game::Render()
         m_deviceResources->GetReflectionSRV(), m_deviceResources->GetRefractionSRV(),
         m_camera->GetPosition());
    
+    //m_foliage->Render(context, m_world, m_camera->GetViewMatrix(), m_proj, m_camera->GetPosition());
 
     ID3D11ShaderResourceView* nullSrv = nullptr;
     context->PSSetShaderResources(0, 1, &nullSrv);
@@ -277,7 +278,7 @@ void Game::CreateWindowSizeDependentResources()
     m_camera = std::make_unique<Camera>();
     m_camera->SetPosition(50.f, 10.f, -4.f);
     m_water = std::make_unique<Water>(device, context, 3.75f, 128.f);
-
+    m_foliage = std::make_unique<Foliage>(device, context);
 }
 
 void Game::OnDeviceLost()
@@ -289,6 +290,7 @@ void Game::OnDeviceLost()
     m_raster.Reset();
     m_skyDome.reset();
     m_water.reset();
+    m_foliage.reset();
 }
 
 void Game::OnDeviceRestored()

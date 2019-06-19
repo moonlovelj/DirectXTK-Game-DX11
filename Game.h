@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "SkyDome.h"
 #include "Water.h"
+#include "Foliage.h"
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -73,4 +74,5 @@ private:
     std::unique_ptr<Camera>                 m_camera;
     std::unique_ptr<SkyDome>                m_skyDome;
     std::unique_ptr<Water>                  m_water;
+    std::unique_ptr<Foliage>                m_foliage;
 };

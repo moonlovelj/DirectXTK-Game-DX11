@@ -153,7 +153,7 @@ void Water::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleMat
     deviceContext->PSSetConstantBuffers(0, 1, m_waterBuffer.GetAddressOf());
 
 
-    deviceContext->OMSetBlendState(m_states->Additive(), Color{ 0,0,0,0 }, 0xFFFFFFFF);
+    deviceContext->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
     deviceContext->OMSetDepthStencilState(m_states->DepthDefault(), 0);
     deviceContext->RSSetState(m_states->CullCounterClockwise());
 

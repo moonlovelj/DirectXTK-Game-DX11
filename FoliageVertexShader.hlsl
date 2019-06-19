@@ -1,7 +1,4 @@
 
-/////////////
-// GLOBALS //
-/////////////
 cbuffer MatrixBuffer
 {
     row_major matrix worldMatrix;
@@ -9,10 +6,6 @@ cbuffer MatrixBuffer
     row_major matrix projectionMatrix;
 };
 
-
-//////////////
-// TYPEDEFS //
-//////////////
 struct VertexInputType
 {
     float4 position : SV_POSITION;
@@ -20,26 +13,23 @@ struct VertexInputType
     float3 positionOffset: TEXCOORD1;
 };
 
-struct PixelInputType
+struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
+    float3 worldPosition : TEXCOORD1;
 };
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Vertex Shader
-////////////////////////////////////////////////////////////////////////////////
-PixelInputType main(VertexInputType input)
+VS_OUTPUT main(VertexInputType input)
 {
-    PixelInputType output;
+    VS_OUTPUT output;
 
-    // Change the position vector to be 4 units for proper matrix calculations.
     input.position.w = 1.0f;
-
     // Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
     output.position.xyz += input.positionOffset;
+    output.worldPosition = output.position.xyz;
+
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
 

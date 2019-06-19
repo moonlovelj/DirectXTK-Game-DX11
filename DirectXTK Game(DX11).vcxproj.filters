@@ -64,5 +64,6 @@
     <FxCompile Include="WaterVertexShader.hlsl" />
     <FxCompile Include="FoliagePixelShader.hlsl" />
     <FxCompile Include="FoliageVertexShader.hlsl" />
+    <FxCompile Include="FoliageGeometryShader.hlsl" />
   </ItemGroup>
 </Project>

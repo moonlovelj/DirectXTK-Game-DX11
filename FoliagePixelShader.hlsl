@@ -1,32 +1,21 @@
 
-//////////////
-// TEXTURES //
-//////////////
-Texture2D gTexture : register(t0);
+Texture2D foliageTexture : register(t0);
 
-//////////////
-// SAMPLERS //
-//////////////
 SamplerState SampleType;
 
-
-
-//////////////
-// TYPEDEFS //
-//////////////
 struct PixelInputType
 {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
 };
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Pixel Shader
-////////////////////////////////////////////////////////////////////////////////
 float4 main(PixelInputType input) : SV_TARGET
 {
-    float4 color = gTexture.Sample(SampleType, input.tex);
-    clip(color.a - 0.25f);
+    float4 color = foliageTexture.Sample(SampleType, input.tex);
+    //clip(color.a - 0.25f);
+//color.r = 1.f;
+//color.g = 0.f;
+//color.b = 0.f;
+//color.a = 1.f;
     return color;
 }
