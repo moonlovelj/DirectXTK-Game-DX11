@@ -8,18 +8,20 @@ using Microsoft::WRL::ComPtr;
 
 Foliage::Foliage(ID3D11Device1* device, ID3D11DeviceContext1* deviceContext)
 {
+    deviceContext;
+
     m_states = std::make_unique<CommonStates>(device);
 
     m_vertices.resize(1);
     m_vertices[0].position = { 0.f, 5.f, 0.f };
 
-    size_t instanceCount = 64;
+    size_t instanceCount = 32;
     m_instances.resize(instanceCount * instanceCount);
     for (size_t i = 0; i < instanceCount; i++)
     {
         for (size_t j = 0; j < instanceCount; j++)
         {
-            m_instances[i*instanceCount + j] = { j * 4.f, 0.f, i*4.f };
+            m_instances[i*instanceCount + j] = { j * 8.f, 0.f, i*8.f };
         }
     }
 
@@ -112,10 +114,10 @@ void Foliage::Render(ID3D11DeviceContext1* deviceContext, const DirectX::SimpleM
     deviceContext->OMSetDepthStencilState(m_states->DepthDefault(), 0);
     deviceContext->RSSetState(m_states->CullNone());
 
-    ID3D11SamplerState* samplers[] = { m_states->LinearWrap() };
+    ID3D11SamplerState* samplers[] = { m_states->LinearClamp() };
     deviceContext->PSSetSamplers(0, 1, samplers);
 
-    deviceContext->PSSetShaderResources(0, 1, &m_texture);
+    deviceContext->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
 
     deviceContext->IASetInputLayout(m_inputLayout.Get());
 

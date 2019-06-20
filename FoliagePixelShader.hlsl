@@ -12,10 +12,7 @@ struct PixelInputType
 float4 main(PixelInputType input) : SV_TARGET
 {
     float4 color = foliageTexture.Sample(SampleType, input.tex);
-    //clip(color.a - 0.25f);
-//color.r = 1.f;
-//color.g = 0.f;
-//color.b = 0.f;
-//color.a = 1.f;
+    clip(color.a - 0.25f);
+    color = saturate(color);
     return color;
 }

@@ -51,10 +51,10 @@ void main(point VS_OUTPUT input[1], inout TriangleStream<PixelInputType> OutputS
     
     // Get billboards texture coordinates
     float2 texCoord[4];
-    texCoord[0] = float2(0, 0);
-    texCoord[1] = float2(1, 0);
-    texCoord[2] = float2(0, 1);
-    texCoord[3] = float2(1, 1);
+    texCoord[0] = float2(0, 1);
+    texCoord[1] = float2(1, 1);
+    texCoord[2] = float2(0, 0);
+    texCoord[3] = float2(1, 0);
 
     for (int i = 0; i < 4; i++)
     {

@@ -114,7 +114,7 @@ void Game::Render()
         m_deviceResources->GetReflectionSRV(), m_deviceResources->GetRefractionSRV(),
         m_camera->GetPosition());
    
-    //m_foliage->Render(context, m_world, m_camera->GetViewMatrix(), m_proj, m_camera->GetPosition());
+    m_foliage->Render(context, m_world, m_camera->GetViewMatrix(), m_proj, m_camera->GetPosition());
 
     ID3D11ShaderResourceView* nullSrv = nullptr;
     context->PSSetShaderResources(0, 1, &nullSrv);
