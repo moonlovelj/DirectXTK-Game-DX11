@@ -95,6 +95,7 @@ void Game::Render()
     ClearReflection();
     m_skyDome->Render(context, SimpleMath::operator *(m_world, skyReflectTranslation), m_camera->GetReflectionMatrix(m_water->GetWaterPlaneHeight()), m_proj);
     m_terrain->Render(context, m_world, m_camera->GetReflectionMatrix(m_water->GetWaterPlaneHeight()), m_proj, waterPlane);
+    m_foliage->Render(context, m_world, m_camera->GetReflectionMatrix(m_water->GetWaterPlaneHeight()), m_proj, m_camera->GetPosition());
 
     ClearRefraction();
     m_terrain->Render(context, m_world, m_camera->GetViewMatrix(), m_proj, { 0.f, -1.f, 0.f, m_water->GetWaterPlaneHeight() + 0.1f });
